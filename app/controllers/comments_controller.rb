@@ -44,17 +44,23 @@ class CommentsController < ApplicationController
       render :edit
     else
       flash[:notice]="You are not authorized to edit comments!"
-      redirect_to city_post_path(@city,@post)
+      redirect_to(city_post_path(@city,@post))
     end
   end
 
   def update
-    @post = Post.find(params[:post_id])
-    @city = City.find(params[:city_id])
-    @comment = Comment.find(params[:comment_id])
-    @comment.update(comment_params)
-    flash[:notice]="Comment succesfully updated!"
-    redirect_to city_post_path(@city,@post)
+    post = Post.find(params[:post_id])
+    city = City.find(params[:city_id])
+
+    comment = Comment.find(params[:comment_id])
+    if current_user == comment.user
+      comment.update(comment_params)
+
+      flash[:notice]="Comment succesfully updated!"
+      redirect_to city_post_path(city,post)
+    else
+      head(:forbidden)
+    end
   end
 
   def destroy
